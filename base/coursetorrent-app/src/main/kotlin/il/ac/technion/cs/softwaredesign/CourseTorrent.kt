@@ -159,12 +159,12 @@ class CourseTorrent {
         val alphbet : List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
 
 
-        val peer_id = "-CS1000-" + SHA1hash("209418441208607507".toByteArray()) +
-                List(6) {alphbet.random()}.joinToString("")
+//        val peer_id = "-CS1000-" + SHA1hash("209418441208607507".toByteArray()) +
+//                List(6) {alphbet.random()}.joinToString("")
+//
+//        return library.getInterval(the_announces_list,infohash,peer_id,true,uploaded,downloaded,left)
 
-        return library.getInterval(the_announces_list,infohash,peer_id,true,uploaded,downloaded,left)
-
-
+        return "ks_amk_matan".toInt()
     }
 
 
