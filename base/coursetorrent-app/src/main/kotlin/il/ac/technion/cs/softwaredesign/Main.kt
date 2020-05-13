@@ -14,23 +14,26 @@ import java.text.DecimalFormat
 
 fun main() {
 
-//    val alphbet : List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
-//    val rand6Chars = List(6) {alphbet.random()}.joinToString("")
-//
-//    val peer_id = "-CS1000-" + SHA1hash("209418441208607507".toByteArray()) +
-//            List(6) {alphbet.random()}.joinToString("")
-//
-//    val hexa_peer_id = StringToEscapedHexa(peer_id)
-//
-//    //val torrent = CourseTorrent()
-//    val lame = CourseTorrent::class.java.getResource("/lame.torrent").readBytes()
-//    val infohash = Parser(lame).infohash
-//
-//   sendGetRequest("https://127.0.0.1:8082/announce",
-//           infohash ,
-//       peer_id , TorrentEvent.STARTED,0,0,0)
+    val alphbet : List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+    val rand6Chars = List(6) {alphbet.random()}.joinToString("")
 
-    print(StringToEscapedHexa("123ba2"))
+    val peer_id = "-CS1000-" + SHA1hash("209418441208607507".toByteArray()) +
+            List(6) {alphbet.random()}.joinToString("")
+
+    val hexa_peer_id = StringToEscapedHexa(peer_id)
+
+    //val torrent = CourseTorrent()
+    val lame = CourseTorrent::class.java.getResource("/lame.torrent").readBytes()
+    val infohash = Parser(lame).infohash
+
+   sendGetRequest("http://bttracker.debian.org:6969/announce",
+           "5a8062c076fa85e8056451c0d9aa04349ae27909" ,
+       peer_id , TorrentEvent.STARTED,0,0,0)
+
+
+    println(StringToEscapedHexa(peer_id))
+    println(peer_id)
+
 
 
 
@@ -164,16 +167,17 @@ fun getHexaValue(char : Char) : Int{
 }
 fun sendGetRequest(url : String,infohash : String , peer_id : String , event : TorrentEvent, uploaded: Long, downloaded: Long, left: Long) {
 
-    var reqParam = URLEncoder.encode("info_hash", "UTF-8") + "=" + StringToEscapedHexa(infohash)
-    reqParam += "&" + URLEncoder.encode("peer_id", "UTF-8") + "=" + StringToEscapedHexa(peer_id)
-    reqParam += "&" + URLEncoder.encode("uploaded", "UTF-8") + "=" + uploaded
-    reqParam += "&" + URLEncoder.encode("downloaded", "UTF-8") + "=" + downloaded
-    reqParam += "&" + URLEncoder.encode("left", "UTF-8") + "=" + left
-    reqParam += "&" + URLEncoder.encode("compact", "UTF-8") + "=" + 1
-    reqParam += "&" + URLEncoder.encode("event", "UTF-8") + "=" + event
-    reqParam += "&" + URLEncoder.encode("port", "UTF-8") + "=" + "6881"
+    var reqParam = "info_hash"+ "=" + StringToEscapedHexa(infohash)
+    reqParam += "&" + "peer_id" + "=" + peer_id
+    reqParam += "&" + "uploaded" + "=" + uploaded.toString()
+    reqParam += "&" + "downloaded"+ "=" + downloaded.toString()
+    reqParam += "&" + "left" + "=" + left.toString()
+    reqParam += "&" + "compact" + "=" + "1"
+    reqParam += "&" + "event" + "=" + event.name
+    reqParam += "&" + "port" + "=" + "6881"
 
-    val mURL = URL(url + "?")
+    val mURL = URL("http://bttracker.debian.org:6969/announce?info_hash=Z%80b%c0v%fa%85%e8%05dQ%c0%d9%aa%044%9a%e2y%09&peer_id=-CS1000-349355fE4cS8&port=6882&uploaded=0&downloaded=0&left=0&compact=1&event=started")
+    println(mURL)
 
     with(mURL.openConnection() as HttpURLConnection) {
         // optional default is GET

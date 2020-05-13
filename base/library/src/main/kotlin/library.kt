@@ -227,7 +227,7 @@ class library  {
     fun sendGetRequest(url : String,infohash : String , peer_id : String , event : Boolean, uploaded: Long, downloaded: Long, left: Long) {
 
         var reqParam = URLEncoder.encode("info_hash", "UTF-8") + "=" + StringToEscapedHexa(infohash)
-        reqParam += "&" + URLEncoder.encode("peer_id", "UTF-8") + "=" + StringToEscapedHexa(peer_id)
+        reqParam += "&" + URLEncoder.encode("peer_id", "UTF-8") + "=" + peer_id
         reqParam += "&" + URLEncoder.encode("uploaded", "UTF-8") + "=" + uploaded
         reqParam += "&" + URLEncoder.encode("downloaded", "UTF-8") + "=" + downloaded
         reqParam += "&" + URLEncoder.encode("left", "UTF-8") + "=" + left
