@@ -7,3 +7,9 @@ base/.gradle/vcs-1/sd-primiti_88b8715h7hb8y9xzbg1ml5gi5/sd-primitive-storage-lay
 base/.gradle/checksums/sha1-checksums.bin
 *.bin
 *.lock
+*.lock
+*.lock
+*.bin
+*.class
+*.tab
+*.jar
