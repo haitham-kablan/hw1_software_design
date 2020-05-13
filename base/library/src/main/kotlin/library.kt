@@ -177,74 +177,21 @@ class library  {
 
 
 
-    fun sendGetRequest(url : String,infohash : String , peer_id : String , event : Boolean, uploaded: Long, downloaded: Long, left: Long) {
-
-        var reqParam = URLEncoder.encode("infohash", "UTF-8") + "=" + StringToEscapedHexa(infohash)
-        reqParam += "&" + URLEncoder.encode("peer_id", "UTF-8") + "=" + peer_id
-        reqParam += "&" + URLEncoder.encode("uploaded", "UTF-8") + "=" + uploaded
-        reqParam += "&" + URLEncoder.encode("downloaded", "UTF-8") + "=" + downloaded
-        reqParam += "&" + URLEncoder.encode("left", "UTF-8") + "=" + left
-        reqParam += "&" + URLEncoder.encode("compact", "UTF-8") + "=" + 1
-        reqParam += "&" + URLEncoder.encode("event", "UTF-8") + "=" + ""//TODO:check this
-
-        val mURL = URL(url + reqParam)
-
-        with(mURL.openConnection() as HttpURLConnection) {
-            // optional default is GET
-            requestMethod = "GET"
-
-            println("URL : $url")
-            println("Response Code : $responseCode")
-
-            BufferedReader(InputStreamReader(inputStream)).use {
-                val response = StringBuffer()
-
-                var inputLine = it.readLine()
-                while (inputLine != null) {
-                    response.append(inputLine)
-                    inputLine = it.readLine()
-                }
-                it.close()
-                println("Response : $response")
-            }
-            //TODO EXTRACT INTERVAL AND RTURNS IT
-        }
-    }
-
-    fun StringToEscapedHexa(infohash : String) : String{
-
-        var infohashAsByterArray : String = ""
-
-        for (i in 0 until infohash.length){
-
-            if (i == infohash.length - 1 ){
-                return infohashAsByterArray
-            }
-            var current_hex = infohash[i].toString() + infohash[i+1].toString()
-            var current_hex_value = HexaStringToChar(current_hex)
-            infohashAsByterArray = infohashAsByterArray + CharToNNformat(current_hex_value)
-            i.plus(1)
-
-        }
-
-        return infohashAsByterArray
-
-    }
 
     fun CharToNNformat(char : Char) : String{
         if(         (   (char >= '0' && char <= '9')
-                        || (char >= 'a' && char <= 'z')
-                        || (char >= 'A' && char <= 'Z')
-                        || char == '.'
-                        || char == '_'
-                        || char == '-'
-                        || char == '~')){
+                    || (char >= 'a' && char <= 'z')
+                    || (char >= 'A' && char <= 'Z')
+                    || char == '.'
+                    || char == '_'
+                    || char == '-'
+                    || char == '~')){
 
             return char.toString()
         }
 
 
-        return "%" + char.toInt().toBigDecimal().toString()
+        return "%" + java.lang.Integer.toHexString(char.toInt())
     }
 
 
@@ -277,7 +224,60 @@ class library  {
 
         return char.toInt() - 48
     }
+    fun sendGetRequest(url : String,infohash : String , peer_id : String , event : Boolean, uploaded: Long, downloaded: Long, left: Long) {
 
+        var reqParam = URLEncoder.encode("info_hash", "UTF-8") + "=" + StringToEscapedHexa(infohash)
+        reqParam += "&" + URLEncoder.encode("peer_id", "UTF-8") + "=" + StringToEscapedHexa(peer_id)
+        reqParam += "&" + URLEncoder.encode("uploaded", "UTF-8") + "=" + uploaded
+        reqParam += "&" + URLEncoder.encode("downloaded", "UTF-8") + "=" + downloaded
+        reqParam += "&" + URLEncoder.encode("left", "UTF-8") + "=" + left
+        reqParam += "&" + URLEncoder.encode("compact", "UTF-8") + "=" + 1
+        reqParam += "&" + URLEncoder.encode("event", "UTF-8") + "=" + event
+        reqParam += "&" + URLEncoder.encode("port", "UTF-8") + "=" + "6881"
+
+        val mURL = URL(url + "?")
+
+        with(mURL.openConnection() as HttpURLConnection) {
+            // optional default is GET
+            requestMethod = "GET"
+
+            println("URL : $url")
+            println("Response Code : $responseCode")
+
+            BufferedReader(InputStreamReader(inputStream)).use {
+                val response = StringBuffer()
+
+                var inputLine = it.readLine()
+                while (inputLine != null) {
+                    response.append(inputLine)
+                    inputLine = it.readLine()
+                }
+                it.close()
+                println("Response : $response")
+            }
+            //TODO EXTRACT INTERVAL AND RTURNS IT
+        }
+    }
+    fun StringToEscapedHexa(infohash : String) : String{
+
+        var infohashAsByterArray : String = ""
+        var i = 0
+
+        while(i < infohash.length - 1){
+
+//        if (i == infohash.length - 2 ){
+//            return infohashAsByterArray
+//        }
+            var current_hex = infohash[i].toString() + infohash[i+1].toString()
+            var current_hex_value = HexaStringToChar(current_hex)
+            infohashAsByterArray = infohashAsByterArray + CharToNNformat(current_hex_value)
+            i = i + 2
+
+        }
+
+        return infohashAsByterArray
+
+    }
 
     public fun SHA1hash(str1 : ByteArray) : String{
 

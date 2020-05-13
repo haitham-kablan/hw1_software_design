@@ -1,5 +1,8 @@
 package il.ac.technion.cs.softwaredesign
 import Parser
+import com.google.common.io.Resources.getResource
+import com.sun.javafx.scene.control.skin.Utils.getResource
+import dev.misfitlabs.kotlinguice4.getInstance
 import library
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -11,17 +14,25 @@ import java.text.DecimalFormat
 
 fun main() {
 
-    val alphbet : List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
-    val rand6Chars = List(6) {alphbet.random()}.joinToString("")
+//    val alphbet : List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+//    val rand6Chars = List(6) {alphbet.random()}.joinToString("")
+//
+//    val peer_id = "-CS1000-" + SHA1hash("209418441208607507".toByteArray()) +
+//            List(6) {alphbet.random()}.joinToString("")
+//
+//    val hexa_peer_id = StringToEscapedHexa(peer_id)
+//
+//    //val torrent = CourseTorrent()
+//    val lame = CourseTorrent::class.java.getResource("/lame.torrent").readBytes()
+//    val infohash = Parser(lame).infohash
+//
+//   sendGetRequest("https://127.0.0.1:8082/announce",
+//           infohash ,
+//       peer_id , TorrentEvent.STARTED,0,0,0)
 
-    val peer_id = "-CS1000-" + SHA1hash("209418441208607507".toByteArray()) +
-            List(6) {alphbet.random()}.joinToString("")
+    print(StringToEscapedHexa("123ba2"))
 
-    val hexa_peer_id = StringToEscapedHexa(peer_id)
 
-   sendGetRequest("https://127.0.0.1:8082/announce",
-           "5a8062c076fa85e8056451c0d9aa04349ae27909" ,
-           hexa_peer_id , TorrentEvent.STARTED,0,0,0)
 
 }
 
@@ -118,7 +129,7 @@ fun CharToNNformat(char : Char) : String{
     }
 
 
-    return "%" + char.toInt().toBigDecimal().toString()
+    return "%" + java.lang.Integer.toHexString(char.toInt())
 }
 
 
@@ -154,14 +165,15 @@ fun getHexaValue(char : Char) : Int{
 fun sendGetRequest(url : String,infohash : String , peer_id : String , event : TorrentEvent, uploaded: Long, downloaded: Long, left: Long) {
 
     var reqParam = URLEncoder.encode("info_hash", "UTF-8") + "=" + StringToEscapedHexa(infohash)
-    reqParam += "&" + URLEncoder.encode("peer_id", "UTF-8") + "=" + peer_id
+    reqParam += "&" + URLEncoder.encode("peer_id", "UTF-8") + "=" + StringToEscapedHexa(peer_id)
     reqParam += "&" + URLEncoder.encode("uploaded", "UTF-8") + "=" + uploaded
     reqParam += "&" + URLEncoder.encode("downloaded", "UTF-8") + "=" + downloaded
     reqParam += "&" + URLEncoder.encode("left", "UTF-8") + "=" + left
     reqParam += "&" + URLEncoder.encode("compact", "UTF-8") + "=" + 1
     reqParam += "&" + URLEncoder.encode("event", "UTF-8") + "=" + event
+    reqParam += "&" + URLEncoder.encode("port", "UTF-8") + "=" + "6881"
 
-    val mURL = URL(url + "?" + reqParam)
+    val mURL = URL(url + "?")
 
     with(mURL.openConnection() as HttpURLConnection) {
         // optional default is GET
@@ -187,16 +199,17 @@ fun sendGetRequest(url : String,infohash : String , peer_id : String , event : T
 fun StringToEscapedHexa(infohash : String) : String{
 
     var infohashAsByterArray : String = ""
+    var i = 0
 
-    for (i in 0 until infohash.length){
+   while(i < infohash.length - 1){
 
-        if (i == infohash.length - 1 ){
-            return infohashAsByterArray
-        }
+//        if (i == infohash.length - 2 ){
+//            return infohashAsByterArray
+//        }
         var current_hex = infohash[i].toString() + infohash[i+1].toString()
         var current_hex_value = HexaStringToChar(current_hex)
         infohashAsByterArray = infohashAsByterArray + CharToNNformat(current_hex_value)
-        i.plus(1)
+        i = i + 2
 
     }
 

@@ -156,7 +156,12 @@ class CourseTorrent {
                                     throw E
                                  }
 
-        val peer_id = library.StringToEscapedHexa(library.SHA1hash(("209418441" + "208607507").toByteArray()))
+        val alphbet : List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+
+
+        val peer_id = "-CS1000-" + SHA1hash("209418441208607507".toByteArray()) +
+                List(6) {alphbet.random()}.joinToString("")
+
         return library.getInterval(the_announces_list,infohash,peer_id,true,uploaded,downloaded,left)
 
 
