@@ -1,6 +1,7 @@
 package il.ac.technion.cs.softwaredesign
 
 import ExtractIntervalFromResponse
+import GetFirstUrlSucessInterval
 import SHA1hash
 import StringToEscapedHexa
 
@@ -13,17 +14,32 @@ import java.net.URL
 
 fun main() {
 
-    println(StringToEscapedHexa("5a8062c076fa85e8056451c0d9aa04349ae27909"))
+//    println(StringToEscapedHexa("5a8062c076fa85e8056451c0d9aa04349ae27909"))
+//    val alphbet : List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+//
+//    val peer_id = "-CS1000-" + SHA1hash("209418441208607507".toByteArray()).substring(0,6) +
+//                List(6) {alphbet.random()}.joinToString("")
+//
+//    val res = sendGetRequest("http://bttracker.debian.org:6969/announce" , "5a8062c076fa85e8056451c0d9aa04349ae27909"
+//    ,peer_id,TorrentEvent.STARTED.name,0,0,0)
+//
+//    ExtractIntervalFromResponse(res)
+//    println( ExtractIntervalFromResponse(res))
+//
+    var infohash = "5a8062c076fa85e8056451c0d9aa04349ae27909"
+    var teir1 = ArrayList<String>()
+    teir1.add("http://bttracker.debian.org:6969/announce")
+    var announce_list = ArrayList<ArrayList<String>>()
+    announce_list.add(teir1)
     val alphbet : List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
 
     val peer_id = "-CS1000-" + SHA1hash("209418441208607507".toByteArray()).substring(0,6) +
-                List(6) {alphbet.random()}.joinToString("")
+            List(6) {alphbet.random()}.joinToString("")
 
-    val res = sendGetRequest("http://bttracker.debian.org:6969/announce" , "5a8062c076fa85e8056451c0d9aa04349ae27909"
-    ,peer_id,TorrentEvent.STARTED.name,0,0,0)
 
-    ExtractIntervalFromResponse(res)
-    println( ExtractIntervalFromResponse(res))
+    var x =
+        GetFirstUrlSucessInterval(announce_list,infohash,peer_id,"started",0,0,0)
+     println(x)
 
 
 

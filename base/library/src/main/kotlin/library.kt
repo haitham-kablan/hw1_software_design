@@ -169,17 +169,18 @@ fun GetFirstUrlSucessInterval(old_list : List<List<String>> , infohas : String ,
 
 
             for (curr in shuffled_list.indices) {
-                var response = SendHttpRequset(shuffled_list_orderd[curr] , infohas , peer_id , event
+                var response = SendHttpRequset(shuffled_list[curr] , infohas , peer_id , event
                                 ,uploaded,downloaded,left)
                     if (CheckResponse(response)) {
-                    ListAddFirst(shuffled_list[curr], shuffled_list_orderd)
+                        shuffled_list_orderd = ListAddFirst(shuffled_list[curr], shuffled_list_orderd) as ArrayList<String>
+
                     //copy rest of the list as it
-                    for (i in curr + 1..shuffled_list.size) {
+                    for (i in curr + 1..shuffled_list.size - 1) {
                         shuffled_list_orderd.add(shuffled_list[i])
+                    }
                         not_found = false
                         interval = ExtractIntervalFromResponse(response)
                         break
-                    }
 
                      }
                 ListAddFirst(shuffled_list[curr], shuffled_list_orderd)
