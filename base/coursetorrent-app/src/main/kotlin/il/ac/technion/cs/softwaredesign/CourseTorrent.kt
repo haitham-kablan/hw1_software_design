@@ -1,6 +1,8 @@
 package il.ac.technion.cs.softwaredesign
 
+import GetFirstUrlSucessInterval
 import Parser
+import SHA1hash
 import byteArrayToListOfListOfString
 import il.ac.technion.cs.softwaredesign.exceptions.TrackerException
 import library
@@ -158,13 +160,12 @@ class CourseTorrent {
 
         val alphbet : List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
 
+        val peer_id = "-CS1000-" + SHA1hash("209418441208607507".toByteArray()).substring(0,6) +
+                List(6) {alphbet.random()}.joinToString("")
 
-//        val peer_id = "-CS1000-" + SHA1hash("209418441208607507".toByteArray()) +
-//                List(6) {alphbet.random()}.joinToString("")
-//
-//        return library.getInterval(the_announces_list,infohash,peer_id,true,uploaded,downloaded,left)
 
-        return "ks_amk_matan".toInt()
+        return GetFirstUrlSucessInterval(the_announces_list,infohash,peer_id,event.name,uploaded,downloaded,left)
+
     }
 
 

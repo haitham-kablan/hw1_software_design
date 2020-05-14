@@ -16,6 +16,8 @@ class Parser public constructor(str : ByteArray) {
     private var info_start = 0
     private var info_end = 0
     private var pieces_start = 0
+    private var peers_start = 0
+    private var peers_end = 0
     private var pieces_end = 0
     private var id : Int = 0
 
@@ -119,7 +121,8 @@ class Parser public constructor(str : ByteArray) {
                 if (torrentFileText[id].toChar() == 'e') return out
                 val key = read()
                 ++id
-
+                if(key == "peers")
+                    peers_start = id
                 if(key == "pieces")
                     pieces_start = id
                 if(key == "info")
@@ -129,6 +132,8 @@ class Parser public constructor(str : ByteArray) {
 
                 if(key  == "pieces")
                     pieces_end = id
+                if(key  == "peers")
+                    peers_end = id
                 if(key == "info")
                     info_end = id + 1
 
@@ -148,6 +153,17 @@ class Parser public constructor(str : ByteArray) {
                 if (c == ':') {
 
                     if (id in pieces_start..pieces_end)//get out as raw bytes
+                    {
+
+                        // val out: String = torrentFileText.toByteArray().decodeToString(id+1,id+len + 1,false)//.substring(id + 1, id  + 11)
+
+                        val out = torrentFileText.copyOfRange(id+1,id+len+1)
+                        id +=  len
+
+                        return out
+                    }
+
+                    if (id in peers_start..peers_end)//get out as raw bytes
                     {
 
                         // val out: String = torrentFileText.toByteArray().decodeToString(id+1,id+len + 1,false)//.substring(id + 1, id  + 11)

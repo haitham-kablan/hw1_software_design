@@ -117,42 +117,117 @@ public fun byteArrayToListOfListOfString(byteArray : ByteArray) : List<List<Stri
 }
 
 
-fun getInterval(old_list : List<List<String>> , infohas : String , peer_id : String,
-                Started: Boolean, uploaded: Long,
-                downloaded: Long, left: Long) : Int {
+//fun getInterval(old_list : List<List<String>> , infohas : String , peer_id : String,
+//                event: String, uploaded: Long,
+//                downloaded: Long, left: Long) : Int {
+//
+//    var list1 = mutableListOf<List<String>>()
+//
+//
+//    for (i in old_list.indices){
+//
+//        var list = old_list[i]
+//        if (Started){
+//            list  = old_list[i].shuffled()
+//        }
+//
+//        var list2 = mutableListOf<String>()
+//        list.forEach {
+//            //sendGetRequest(URL(it) , infohas ,)
+//            print(it)
+//            // if(SENDING IT TO HTTP WAS SUCCESS)
+//            //list2.add(0, it)
+//            // else
+//            list2.add(it)
+//        }
+//
+//        //list1 is same order as old_list
+//        list1.add(list2)
+//    }
+//    //TODO: write list 1 to db
+//    //return list1;
+//    return 0
+//}
 
-    var list1 = mutableListOf<List<String>>()
 
 
-    for (i in old_list.indices){
+fun GetFirstUrlSucessInterval(old_list : List<List<String>> , infohas : String , peer_id : String,
+                              event: String, uploaded: Long,
+                              downloaded: Long, left: Long) : Int{
 
-        var list = old_list[i]
-        if (Started){
-            list  = old_list[i].shuffled()
+    var new_announce_list = ArrayList<ArrayList<String>>()
+    var not_found = true
+    var interval = 0
+    old_list.forEach {
+
+        if (not_found) {
+            var shuffled_list = it
+            if (event.equals("started")) {
+                shuffled_list = it.shuffled()
+            }
+            var shuffled_list_orderd = ArrayList<String>()
+
+
+            for (curr in shuffled_list.indices) {
+                var response = SendHttpRequset(shuffled_list_orderd[curr] , infohas , peer_id , event
+                                ,uploaded,downloaded,left)
+                    if (CheckResponse(response)) {
+                    ListAddFirst(shuffled_list[curr], shuffled_list_orderd)
+                    //copy rest of the list as it
+                    for (i in curr + 1..shuffled_list.size) {
+                        shuffled_list_orderd.add(shuffled_list[i])
+                        not_found = false
+                        interval = ExtractIntervalFromResponse(response)
+                        break
+                    }
+
+                     }
+                ListAddFirst(shuffled_list[curr], shuffled_list_orderd)
+            }
+            new_announce_list.add(shuffled_list_orderd)
+        } else {
+
+            var curr_res: ArrayList<String> = ArrayList<String>(it)
+            new_announce_list.add(curr_res)
         }
 
-        var list2 = mutableListOf<String>()
-        list.forEach {
-            //sendGetRequest(URL(it) , infohas ,)
-            print(it)
-            // if(SENDING IT TO HTTP WAS SUCCESS)
-            //list2.add(0, it)
-            // else
-            list2.add(it)
-        }
-
-        //list1 is same order as old_list
-        list1.add(list2)
     }
-    //TODO: write list 1 to db
-    //return list1;
-    return 0
+    //WRITE LIST TO DB
+    return interval
+
 }
 
+fun CheckResponse(response : ByteArray) : Boolean{
 
+    //catched exception
+    if(response.size == 0) return false
+    if (Parser(response).metaInfoMap.containsKey("failure reason")) return false
+    return true
 
+}
+fun SendHttpRequset(url: String , infohas : String , peer_id : String,
+                              event: String, uploaded: Long,
+                              downloaded: Long, left: Long) : ByteArray{
 
+    var response : ByteArray = try {
+        sendGetRequest(url, infohas, peer_id, event, uploaded, downloaded, left)
+    }catch (E:Exception){
+        ByteArray(0)
+    }
 
+    return response
+
+}
+fun ListAddFirst(item : String, list : List<String> ) : List<String>{
+
+    var returned_list = ArrayList<String>()
+    returned_list.add(item)
+    list.forEach{
+        returned_list.add(it)
+
+    }
+    return returned_list
+}
 fun CharToNNformat(char : Char , curr_hex : String) : String{
     if(         (   (char >= '0' && char <= '9')
                 || (char >= 'a' && char <= 'z')
@@ -200,7 +275,7 @@ fun getHexaValue(char : Char) : Int{
     return char.toInt() - 48
 }
 fun sendGetRequest(url : String, infohash : String, peer_id : String, event : String, uploaded: Long,
-                   downloaded: Long, left: Long) : String{
+                   downloaded: Long, left: Long) : ByteArray{
 
     var reqParam = "info_hash"+ "=" + StringToEscapedHexa(infohash)
     reqParam += "&" + "peer_id" + "=" + peer_id
@@ -212,8 +287,8 @@ fun sendGetRequest(url : String, infohash : String, peer_id : String, event : St
     reqParam += "&" + "port" + "=" + "6881"
 
     val mURL = URL(url + "?" + reqParam)
+
     println(mURL)
-    val response = StringBuffer()
     with(mURL.openConnection() as HttpURLConnection) {
         // optional default is GET
         requestMethod = "GET"
@@ -221,20 +296,12 @@ fun sendGetRequest(url : String, infohash : String, peer_id : String, event : St
         println("URL : $url")
         println("Response Code : $responseCode")
 
-        BufferedReader(InputStreamReader(inputStream)).use {
-
-            var inputLine = it.readLine()
-            while (inputLine != null) {
-                response.append(inputLine)
-                inputLine = it.readLine()
-            }
-            it.close()
-
-        }
+        var x = inputStream.readBytes()
+        return x
 
     }
 
-    return response.toString()
+
 }
 
 fun StringToEscapedHexa(infohash : String) : String{
@@ -275,12 +342,15 @@ public fun SHA1hash(str1 : ByteArray) : String{
     return result.toString()
 }
 
-fun ExtractIntervalFromResponse(response:String) : Int{
+fun ExtractIntervalFromResponse(response:ByteArray) : Int{
 
-    Parser(response.toByteArray(Charsets.UTF_8)).metaInfoMap.get("interval")
-            return 0
+    return (Parser(response).metaInfoMap.get("interval") as Int).toInt()
+
 
 }
+
+
+
 class library  {
 
 

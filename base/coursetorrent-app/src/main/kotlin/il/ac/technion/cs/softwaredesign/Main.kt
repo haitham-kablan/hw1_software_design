@@ -23,7 +23,7 @@ fun main() {
     ,peer_id,TorrentEvent.STARTED.name,0,0,0)
 
     ExtractIntervalFromResponse(res)
-    println(res)
+    println( ExtractIntervalFromResponse(res))
 
 
 
