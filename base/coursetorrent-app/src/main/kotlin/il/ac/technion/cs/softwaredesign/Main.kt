@@ -68,24 +68,9 @@ fun main() {
 
 
 
+//returns bytearray of the scrape response for a single tracker (calls with a specified infohash)
+fun sendScrapeRequest(infohash: String, trackerURL : String) : ByteArray? {
 
-
-
-/**
- * Scrape all trackers identified by a torrent,
- * and store the statistics provided.
- * The specification for the scrape request can be found here:
- * [Scrape Protocol](https://wiki.theory.org/index.php/BitTorrentSpecification#Tracker_.27scrape.27_Convention).
- *
- * All known trackers for the torrent will be scraped.
- *
- * This is an *update* command.
- *
- * @throws IllegalArgumentException If [infohash] is not loaded.
- */
-fun scrape(infohash: String): Unit  {
-
-// Begin with the announce URL.
 // Find the last '/' in it. If the text immediately following that '/'
 // isn't 'announce' it will be taken as a sign that
 // that tracker doesn't support the scrape convention.
@@ -94,57 +79,37 @@ fun scrape(infohash: String): Unit  {
 
     var trackers : List<List<String>> = announces(infohash)
 
-    trackers.forEach outList@{
-        it.forEach inList@{
+    //find last '/'
+    val i = trackerURL.lastIndexOf('/', 0,false);
 
-            //find last '/'
-            val i = it.lastIndexOf('/', 0,false);
+    //check if after it immeaditly is announce
+    var str : CharSequence? = null
+    try {
+        str = trackerURL.subSequence(i,i+"announce".length)
+    } catch (e: Exception){//if no return this iteration (continue)
+        //then there is no 'announce'
+        return null
+    }
+    if(str !== "announce")
+        return null
+    val scrapeURL = trackerURL.copy() //because the announce list needs to stay the same after this, right?
+    //if yes replace announce with scrape, and store the results
+    scrapeURL.replaceRange(i+1,i+"announce".length,"scrape")
 
-            //check if after it immeaditly is announce
-            var str : CharSequence? = null
-            try {
-                str = it.subSequence(i,i+"announce".length)
-            } catch (e: Exception){//if no return this iteration (continue)
-                //then there is no 'announce'
-                return@inList
-            }
-            if(str !== "announce")
-                return@inList
-            val scrapeURL = it.copy() //because the announce list needs to stay the same after this, right?
-            //if yes replace announce with scrape, and store the results
-            scrapeURL.replaceRange(i+1,i+"announce".length,"scrape")
+    val mURL = URL("$scrapeURL?$infohash")
+    println(mURL)//TODO: remove this
 
-            val mURL = URL("$scrapeURL?$infohash")
-            println(mURL)//TODO: remove this
+    //println(mURL)
+    with(mURL.openConnection() as HttpURLConnection) {
+        // optional default is GET
+        requestMethod = "GET"
 
-            with(mURL.openConnection() as HttpURLConnection) {
-                // optional default is GET
-                requestMethod = "GET"
-
-                println("URL : $url")
-                println("Response Code : $responseCode")
-
-                java.io.BufferedReader(java.io.InputStreamReader(inputStream)).use {
-                    val response = StringBuffer()
-
-                    var inputLine = it.readLine()
-                    while (inputLine != null) {
-                        response.append(inputLine)
-                        inputLine = it.readLine()
-                    }
-                    it.close()
-                    println("Response : $response")
-
-                    //(find how and where to store the ScrapeData you
-                    // get out from the returned dictionary)
-
-
-                }
-            }
-        }
+        //println("URL : $url")
+        //println("Response Code : $responseCode")
+        var response = inputStream.readBytes()
+        return response
     }
 }
-
 
 
 

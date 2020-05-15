@@ -182,7 +182,6 @@ class CourseTorrent @Inject constructor(private val factory : SecureStorageFacto
         }
     }
 
-
     /**
      * Scrape all trackers identified by a torrent,
      * and store the statistics provided.
@@ -197,64 +196,38 @@ class CourseTorrent @Inject constructor(private val factory : SecureStorageFacto
      */
     fun scrape(infohash: String): Unit  {
 
-// Begin with the announce URL.
-// Find the last '/' in it. If the text immediately following that '/'
-// isn't 'announce' it will be taken as a sign that
-// that tracker doesn't support the scrape convention.
-// If it does, substitute 'scrape' for 'announce' to find the scrape page.
-
-
+// try to send a scrape request for trackers one by one untill one succeeds
         var trackers : List<List<String>> = announces(infohash)
 
+        var res : ByteArray? = null
         trackers.forEach outList@{
             it.forEach inList@{
-
-                //find last '/'
-                val i = it.lastIndexOf('/', 0,false);
-
-                //check if after it immeaditly is announce
-                var str : CharSequence? = null
-                try {
-                    str = it.subSequence(i,i+"announce".length)
-                } catch (e: Exception){//if no return this iteration (continue)
-                    //then there is no 'announce'
-                    return@inList
+                res = sendScrapeRequest(infohash, it)
+                if (res == null){
+                    val scrapeData = Failure()
+                    //TODO: store that : this tracker (it) doesn't support scrape
                 }
-                if(str !== "announce")
-                    return@inList
-                val scrapeURL = it.copy() //because the announce list needs to stay the same after this, right?
-                //if yes replace announce with scrape, and store the results
-                scrapeURL.replaceRange(i+1,i+"announce".length,"scrape")
+                else{
+                    //store res with ScrapeData
+                    val res = (Parser(response).metaInfoMap.get("files") as Map<any?,Any?>;
+                    val complete = res.get("complete") as Int
+                    val downloaded = res.get("downloaded") as Int
+                    val incomplete = res.get("incomplete") as Int
+                    val name = res.get("name") as String?
+                    val scrapeData = Scrape(complete,downloaded,incomplete, name)
 
-                val mURL = URL("$scrapeURL?$infohash")
-                println(mURL)//TODO: remove this
-
-                with(mURL.openConnection() as HttpURLConnection) {
-                    // optional default is GET
-                    requestMethod = "GET"
-
-                    println("URL : $url")
-                    println("Response Code : $responseCode")
-
-                    java.io.BufferedReader(java.io.InputStreamReader(inputStream)).use {
-                        val response = StringBuffer()
-
-                        var inputLine = it.readLine()
-                        while (inputLine != null) {
-                            response.append(inputLine)
-                            inputLine = it.readLine()
-                        }
-                        it.close()
-                        println("Response : $response")
-
-                        //(find how and where to store the ScrapeData you get out from the returned dictionary)
-
-
-                    }
+                    // TODO: store them somewhere
                 }
+
+
+
+
             }
         }
     }
+
+
+
 
     /**
      * Invalidate a previously known peer for this torrent.
@@ -266,6 +239,7 @@ class CourseTorrent @Inject constructor(private val factory : SecureStorageFacto
      * @throws IllegalArgumentException If [infohash] is not loaded.
      */
     fun invalidatePeer(infohash: String, peer: KnownPeer): Unit {
+
         val readVal = lib_read(infohash,KnowPeer_library)
         if (readVal == null || readVal.toString(Charsets.UTF_8).equals("0"))
             throw IllegalArgumentException()
@@ -283,7 +257,6 @@ class CourseTorrent @Inject constructor(private val factory : SecureStorageFacto
         lib_write(infohash,listOfListOfStringToByteArray(KnowPeers).toString(Charsets.UTF_8),KnowPeer_library)
 
     }
-
 
 
 

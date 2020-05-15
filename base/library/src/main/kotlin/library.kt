@@ -152,6 +152,7 @@ public fun byteArrayToListOfListOfString(byteArray : ByteArray) : List<List<Stri
 fun GetFirstUrlSucessInterval(old_list : List<List<String>>, infohas : String, peer_id : String,
                               event: String, uploaded: Long,
                               downloaded: Long, left: Long,
+
                               list_to_write : MutableList<List<String>>,
                                KnownPeers :MutableList<List<String>>) : Int{
 
@@ -166,7 +167,6 @@ fun GetFirstUrlSucessInterval(old_list : List<List<String>>, infohas : String, p
                 shuffled_list = it.shuffled()
             }
             var shuffled_list_orderd = ArrayList<String>()
-
 
             for (curr in shuffled_list.indices) {
                 var response = SendHttpRequset(shuffled_list[curr] , infohas , peer_id , event
@@ -236,11 +236,13 @@ fun GetKnownPeers(byteArray: ByteArray) : MutableList<List<String>>{
     }
 
     return res
+
 }
 
 fun SendHttpRequset(url: String , infohas : String , peer_id : String,
                               event: String, uploaded: Long,
                               downloaded: Long, left: Long) : ByteArray{
+
 
     var response : ByteArray = try {
         sendGetRequest(url, infohas, peer_id, event, uploaded, downloaded, left)
@@ -251,6 +253,8 @@ fun SendHttpRequset(url: String , infohas : String , peer_id : String,
     return response
 
 }
+
+
 fun ListAddFirst(item : String, list : List<String> ) : List<String>{
 
     var returned_list = ArrayList<String>()
@@ -307,6 +311,7 @@ fun getHexaValue(char : Char) : Int{
 
     return char.toInt() - 48
 }
+
 fun sendGetRequest(url : String, infohash : String, peer_id : String, event : String, uploaded: Long,
                    downloaded: Long, left: Long) : ByteArray{
 
@@ -337,6 +342,9 @@ fun sendGetRequest(url : String, infohash : String, peer_id : String, event : St
 
 }
 
+
+
+
 fun StringToEscapedHexa(infohash : String) : String{
 
     var infohashAsByterArray : String = ""
@@ -354,8 +362,6 @@ fun StringToEscapedHexa(infohash : String) : String{
     return infohashAsByterArray
 
 }
-
-
 
 
 public fun SHA1hash(str1 : ByteArray) : String{
@@ -379,8 +385,53 @@ fun ExtractIntervalFromResponse(response:ByteArray) : Int{
 
     return (Parser(response).metaInfoMap.get("interval") as Int).toInt()
 
-
 }
+
+
+
+//returns bytearray of the scrape response for a single tracker (calls with a specified infohash)
+fun sendScrapeRequest(infohash: String, trackerURL : String) : ByteArray? {
+
+// Find the last '/' in it. If the text immediately following that '/'
+// isn't 'announce' it will be taken as a sign that
+// that tracker doesn't support the scrape convention.
+// If it does, substitute 'scrape' for 'announce' to find the scrape page.
+
+
+    var trackers : List<List<String>> = announces(infohash)
+
+    //find last '/'
+    val i = trackerURL.lastIndexOf('/', 0,false);
+
+    //check if after it immeaditly is announce
+    var str : CharSequence? = null
+    try {
+        str = trackerURL.subSequence(i,i+"announce".length)
+    } catch (e: Exception){//if no return this iteration (continue)
+        //then there is no 'announce'
+        return null
+    }
+    if(str !== "announce")
+        return null
+    val scrapeURL = trackerURL.copy() //because the announce list needs to stay the same after this, right?
+    //if yes replace announce with scrape, and store the results
+    scrapeURL.replaceRange(i+1,i+"announce".length,"scrape")
+
+    val mURL = URL("$scrapeURL?$infohash")
+    println(mURL)//TODO: remove this
+
+    //println(mURL)
+    with(mURL.openConnection() as HttpURLConnection) {
+        // optional default is GET
+        requestMethod = "GET"
+
+        //println("URL : $url")
+        //println("Response Code : $responseCode")
+        var response = inputStream.readBytes()
+        return response
+    }
+}
+
 
 
 fun ExtractIpAdressWithPort(byteArray: UByteArray) : String{
@@ -427,6 +478,9 @@ fun lib_write(key: String, value: String , storage : SecureStorage) : Unit{
 fun lib_delete(key: String , storage : SecureStorage) : Unit {
             lib_write(key, "0",storage)
 }
+
+
+
 
 //class library : SecureStorage {
 //
