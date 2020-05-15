@@ -59,6 +59,20 @@ fun main() {
 
 
 
+
+
+
+}
+
+fun ExtractIpAdressWithPort(byteArray: ByteArray) : ArrayList<Int>{
+
+    var ip_addr_with_port = ArrayList<Int>()
+    byteArray.forEach {
+        var u_byte = it.toUByte()
+        println(u_byte)
+
+    }
+    return ip_addr_with_port
 }
 
 

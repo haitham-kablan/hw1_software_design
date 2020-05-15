@@ -1,15 +1,10 @@
-
 import il.ac.technion.cs.softwaredesign.storage.impl.SecureStorageImpl
-
-import java.io.BufferedReader
-import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
-
-
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.nio.charset.CharsetDecoder
 import java.security.MessageDigest
-
-
 
 
 public fun listOfListOfStringToByteArray( list : List<List<String>>) : ByteArray {
@@ -214,7 +209,10 @@ fun CheckResponse(response : ByteArray) : Boolean{
     if(response.size == 0) return false
     if (Parser(response).metaInfoMap.containsKey("failure reason")) return false
 
-    var x = Parser(response).metaInfoMap
+    var x = Parser(response).metaInfoMap.get("peers") as ByteArray
+    println(x.toString(Charsets.ISO_8859_1))
+//     x.forEach { println(it.toUByte()) }
+
     return true
 
 }
@@ -363,6 +361,16 @@ fun ExtractIntervalFromResponse(response:ByteArray) : Int{
 }
 
 
+fun ExtractIpAdressWithPort(byteArray: ByteArray) : ArrayList<Int>{
+
+    var ip_addr_with_port = ArrayList<Int>()
+    byteArray.forEach {
+        var u_byte = it.toUByte()
+        println(u_byte)
+
+    }
+    return ip_addr_with_port
+}
 
 class library  {
 
