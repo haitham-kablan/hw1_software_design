@@ -51,10 +51,11 @@ fun main() {
             List(6) {alphbet.random()}.joinToString("")
 
     var list = mutableListOf<List<String>>()
+    var peers = mutableListOf<String>()
     var x =
-        GetFirstUrlSucessInterval(announce_list,infohash,peer_id,"started",0,0,0,list)
+        GetFirstUrlSucessInterval(announce_list,infohash,peer_id,"started",0,0,0,list,peers)
      println(x)
-
+    println(peers.toString())
 
 
 
@@ -64,15 +65,5 @@ fun main() {
 
 }
 
-fun ExtractIpAdressWithPort(byteArray: ByteArray) : ArrayList<Int>{
-
-    var ip_addr_with_port = ArrayList<Int>()
-    byteArray.forEach {
-        var u_byte = it.toUByte()
-        println(u_byte)
-
-    }
-    return ip_addr_with_port
-}
 
 

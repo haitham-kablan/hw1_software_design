@@ -149,7 +149,8 @@ public fun byteArrayToListOfListOfString(byteArray : ByteArray) : List<List<Stri
 fun GetFirstUrlSucessInterval(old_list : List<List<String>>, infohas : String, peer_id : String,
                               event: String, uploaded: Long,
                               downloaded: Long, left: Long,
-                              list_to_write : MutableList<List<String>>) : Int{
+                              list_to_write : MutableList<List<String>>,
+                               KnownPeers : MutableList<String>) : Int{
 
     var new_announce_list = ArrayList<ArrayList<String>>()
     var not_found = true
@@ -174,6 +175,10 @@ fun GetFirstUrlSucessInterval(old_list : List<List<String>>, infohas : String, p
                     for (i in curr + 1..shuffled_list.size - 1) {
                         shuffled_list_orderd.add(shuffled_list[i])
                     }
+                        var cpy_KnownPeers = GetKnownPeers(Parser(response).metaInfoMap.get("peers") as ByteArray)
+                        cpy_KnownPeers.forEach{
+                            KnownPeers.add(it)
+                        }
                         not_found = false
                         interval = ExtractIntervalFromResponse(response)
                         break
@@ -195,7 +200,6 @@ fun GetFirstUrlSucessInterval(old_list : List<List<String>>, infohas : String, p
     if(not_found){
         interval = -1
     }
-
     for (curr in new_announce_list.indices) {
         list_to_write.add(new_announce_list[curr])
     }
@@ -209,13 +213,26 @@ fun CheckResponse(response : ByteArray) : Boolean{
     if(response.size == 0) return false
     if (Parser(response).metaInfoMap.containsKey("failure reason")) return false
 
-    var x = Parser(response).metaInfoMap.get("peers") as ByteArray
-    println(x.toString(Charsets.ISO_8859_1))
-//     x.forEach { println(it.toUByte()) }
+    var x = (Parser(response).metaInfoMap.get("peers") as ByteArray).toUByteArray()
+    var i = 0
 
     return true
 
 }
+
+fun GetKnownPeers(byteArray: ByteArray) : MutableList<String>{
+
+    var res  = ArrayList<String>()
+    var unsigned = byteArray.toUByteArray()
+    var i = 0
+    while(i < unsigned.size){
+        res.add(ExtractIpAdressWithPort(unsigned.copyOfRange(i,i+6)))
+        i = i + 6
+    }
+
+    return res
+}
+
 fun SendHttpRequset(url: String , infohas : String , peer_id : String,
                               event: String, uploaded: Long,
                               downloaded: Long, left: Long) : ByteArray{
@@ -361,15 +378,16 @@ fun ExtractIntervalFromResponse(response:ByteArray) : Int{
 }
 
 
-fun ExtractIpAdressWithPort(byteArray: ByteArray) : ArrayList<Int>{
+fun ExtractIpAdressWithPort(byteArray: UByteArray) : String{
 
-    var ip_addr_with_port = ArrayList<Int>()
-    byteArray.forEach {
-        var u_byte = it.toUByte()
-        println(u_byte)
 
-    }
-    return ip_addr_with_port
+    return  byteArray[0].toString() + "." +
+                        byteArray[1].toString() + "." +
+                        byteArray[2].toString() + "." +
+                        byteArray[3].toString() + ":" +
+            (byteArray[4].toString().toInt() * 256 +  byteArray[5].toString().toInt()).toString()
+
+
 }
 
 class library  {

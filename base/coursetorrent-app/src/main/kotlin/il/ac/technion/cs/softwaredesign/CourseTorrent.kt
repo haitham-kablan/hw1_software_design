@@ -164,8 +164,9 @@ class CourseTorrent {
                 List(6) {alphbet.random()}.joinToString("")
 
         var shuffled_annouce_list = mutableListOf<List<String>>()
+        var KnownPeers = mutableListOf<String>()
 
-        var interval =  GetFirstUrlSucessInterval(the_announces_list,infohash,peer_id,event.name,uploaded,downloaded,left , shuffled_annouce_list)
+        var interval =  GetFirstUrlSucessInterval(the_announces_list,infohash,peer_id,event.name,uploaded,downloaded,left , shuffled_annouce_list,KnownPeers)
         if(interval == -1){
             //TODO : write shuflfled to db and check even if failed to write
             throw TrackerException("all the trackers didint work , in all the tiers")
