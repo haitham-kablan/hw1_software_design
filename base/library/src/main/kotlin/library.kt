@@ -213,6 +213,8 @@ fun CheckResponse(response : ByteArray) : Boolean{
     //catched exception
     if(response.size == 0) return false
     if (Parser(response).metaInfoMap.containsKey("failure reason")) return false
+
+    var x = Parser(response).metaInfoMap
     return true
 
 }

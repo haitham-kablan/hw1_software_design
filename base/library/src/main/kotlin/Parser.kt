@@ -163,6 +163,8 @@ class Parser public constructor(str : ByteArray) {
                         return out
                     }
 
+                    peers_end = if(peers_start!=0){peers_start + len.toString().length + len }
+                                else{0}
                     if (id in peers_start..peers_end)//get out as raw bytes
                     {
 
@@ -170,7 +172,7 @@ class Parser public constructor(str : ByteArray) {
 
                         val out = torrentFileText.copyOfRange(id+1,id+len+1)
                         id +=  len
-
+                        peers_start = 0
                         return out
                     }
                     else { //get out as utf8(normal) string
