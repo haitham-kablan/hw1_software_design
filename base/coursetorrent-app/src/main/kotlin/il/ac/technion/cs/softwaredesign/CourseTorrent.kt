@@ -222,7 +222,7 @@ class CourseTorrent @Inject constructor(private val factory : SecureStorageFacto
                 }
                 if(str !== "announce")
                     return@inList
-                val scrapeURL = it //because the announce list needs to stay the same after this, right?
+                val scrapeURL = it.copy() //because the announce list needs to stay the same after this, right?
                 //if yes replace announce with scrape, and store the results
                 scrapeURL.replaceRange(i+1,i+"announce".length,"scrape")
 
@@ -248,6 +248,8 @@ class CourseTorrent @Inject constructor(private val factory : SecureStorageFacto
                         println("Response : $response")
 
                         //(find how and where to store the ScrapeData you get out from the returned dictionary)
+
+
                     }
                 }
             }
