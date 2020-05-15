@@ -163,9 +163,16 @@ class CourseTorrent {
         val peer_id = "-CS1000-" + SHA1hash("209418441208607507".toByteArray()).substring(0,6) +
                 List(6) {alphbet.random()}.joinToString("")
 
+        var shuffled_annouce_list = mutableListOf<List<String>>()
 
-        return GetFirstUrlSucessInterval(the_announces_list,infohash,peer_id,event.name,uploaded,downloaded,left)
-
+        var interval =  GetFirstUrlSucessInterval(the_announces_list,infohash,peer_id,event.name,uploaded,downloaded,left , shuffled_annouce_list)
+        if(interval == -1){
+            //TODO : write shuflfled to db and check even if failed to write
+            throw TrackerException("all the trackers didint work , in all the tiers")
+        }else{
+            //TODO : write shuflfled to db and check even if failed to write
+            return interval
+        }
     }
 
 

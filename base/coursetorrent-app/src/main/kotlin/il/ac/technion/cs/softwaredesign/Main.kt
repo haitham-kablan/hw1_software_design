@@ -28,17 +28,31 @@ fun main() {
 //
     var infohash = "5a8062c076fa85e8056451c0d9aa04349ae27909"
     var teir1 = ArrayList<String>()
-    teir1.add("http://bttracker.debian.org:6969/announce")
+    var teir2 = ArrayList<String>()
+    teir1.add("http://bttracker.debian.2org:6969/announce")
+    teir1.add("2")
+    teir1.add("http://bttracke123r.debian.org:6969/announce")
+    teir1.add("http://bttracker123.debian.org:6969/announce")
+    teir1.add("http://bttrac123ker.debian.org:6969/announce")
+    teir2.add("http://bttracker.debian.org:6969/announce")
+    teir2.add("2")
+    teir2.add("http://bttracke123r.debian.org:6969/announce")
+    teir2.add("http://bttracker123.debian.org:6969/announce")
+    teir2.add("http://bttrac123ker.debian.org:6969/announce")
     var announce_list = ArrayList<ArrayList<String>>()
+    announce_list.add(teir1)
+    announce_list.add(teir2)
+    announce_list.add(teir1)
+    announce_list.add(teir1)
     announce_list.add(teir1)
     val alphbet : List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
 
     val peer_id = "-CS1000-" + SHA1hash("209418441208607507".toByteArray()).substring(0,6) +
             List(6) {alphbet.random()}.joinToString("")
 
-
+    var list = mutableListOf<List<String>>()
     var x =
-        GetFirstUrlSucessInterval(announce_list,infohash,peer_id,"started",0,0,0)
+        GetFirstUrlSucessInterval(announce_list,infohash,peer_id,"started",0,0,0,list)
      println(x)
 
 

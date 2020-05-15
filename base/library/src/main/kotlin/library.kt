@@ -151,9 +151,10 @@ public fun byteArrayToListOfListOfString(byteArray : ByteArray) : List<List<Stri
 
 
 
-fun GetFirstUrlSucessInterval(old_list : List<List<String>> , infohas : String , peer_id : String,
+fun GetFirstUrlSucessInterval(old_list : List<List<String>>, infohas : String, peer_id : String,
                               event: String, uploaded: Long,
-                              downloaded: Long, left: Long) : Int{
+                              downloaded: Long, left: Long,
+                              list_to_write : MutableList<List<String>>) : Int{
 
     var new_announce_list = ArrayList<ArrayList<String>>()
     var not_found = true
@@ -183,7 +184,7 @@ fun GetFirstUrlSucessInterval(old_list : List<List<String>> , infohas : String ,
                         break
 
                      }
-                ListAddFirst(shuffled_list[curr], shuffled_list_orderd)
+                shuffled_list_orderd = ListAddFirst(shuffled_list[curr], shuffled_list_orderd)  as ArrayList<String>
             }
             new_announce_list.add(shuffled_list_orderd)
         } else {
@@ -194,6 +195,15 @@ fun GetFirstUrlSucessInterval(old_list : List<List<String>> , infohas : String ,
 
     }
     //WRITE LIST TO DB
+
+    //TODO WRITE THE INFO TO THE DB
+    if(not_found){
+        interval = -1
+    }
+
+    for (curr in new_announce_list.indices) {
+        list_to_write.add(new_announce_list[curr])
+    }
     return interval
 
 }
@@ -289,13 +299,13 @@ fun sendGetRequest(url : String, infohash : String, peer_id : String, event : St
 
     val mURL = URL(url + "?" + reqParam)
 
-    println(mURL)
+    //println(mURL)
     with(mURL.openConnection() as HttpURLConnection) {
         // optional default is GET
         requestMethod = "GET"
 
-        println("URL : $url")
-        println("Response Code : $responseCode")
+        //println("URL : $url")
+        //println("Response Code : $responseCode")
 
         var x = inputStream.readBytes()
         return x
