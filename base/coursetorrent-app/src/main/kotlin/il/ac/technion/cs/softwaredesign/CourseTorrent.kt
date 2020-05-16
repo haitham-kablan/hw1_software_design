@@ -4,7 +4,13 @@ import GetFirstUrlSucessInterval
 import Parser
 import SHA1hash
 import byteArrayToListOfListOfString
+import com.google.inject.Inject
 import il.ac.technion.cs.softwaredesign.exceptions.TrackerException
+import il.ac.technion.cs.softwaredesign.storage.SecureStorage
+import il.ac.technion.cs.softwaredesign.storage.SecureStorageFactory
+import lib_delete
+import lib_read
+import lib_write
 import library
 
 import listOfListOfStringToByteArray
@@ -18,23 +24,15 @@ import java.net.URL
  * + Parsing torrent metainfo files (".torrent" files)
  * + Communication with trackers (announce, scrape).
  */
-class CourseTorrent {
 
-    private var library : library
+class CourseTorrent @Inject constructor(private val factory : SecureStorageFactory) {
+
+    var announe_list_library = factory.open("announce_list".toByteArray())
+    var KnowPeer_library = factory.open("KnownPeer".toByteArray())
+    var ScrapeData_library = factory.open("ScrapeData".toByteArray())
 
 
-    public constructor(lib : library){
-        this.library = lib
-    }
 
-    public constructor(){
-        this.library = library()
-    }
-
-//    fun shuffle(announce_list: List<List<String>>) : List<List<String>>{
-//
-//
-//    }
     /**
      * Load in the torrent metainfo file from [torrent]. The specification for these files can be found here:
      * [Metainfo File Structure](https://wiki.theory.org/index.php/BitTorrentSpecification#Metainfo_File_Structure).
@@ -53,7 +51,7 @@ class CourseTorrent {
         val metainfomap = parser.metaInfoMap
         val infohash = parser.infohash
 
-        val readVal = library.lib_read(infohash)
+        val readVal = lib_read(infohash,announe_list_library)
 
         if (readVal != null && !readVal.toString(Charsets.UTF_8).equals("0"))//already exists and not deleted
             throw IllegalStateException()
@@ -69,10 +67,10 @@ class CourseTorrent {
             list2.add(list)
 
 
-            library.lib_write(infohash, listOfListOfStringToByteArray(list2).toString(Charsets.UTF_8))
+            lib_write(infohash, listOfListOfStringToByteArray(list2).toString(Charsets.UTF_8),announe_list_library)
         }
         else
-            library.lib_write(infohash, listOfListOfStringToByteArray(announce).toString(Charsets.UTF_8))
+            lib_write(infohash, listOfListOfStringToByteArray(announce).toString(Charsets.UTF_8),announe_list_library)
 
         return infohash
     }
@@ -87,11 +85,13 @@ class CourseTorrent {
     fun unload(infohash: String): Unit {
 
 
-        val readVal = library.lib_read(infohash)
+        val readVal = lib_read(infohash,announe_list_library)
         if (readVal == null || readVal.toString(Charsets.UTF_8).equals("0"))
             throw IllegalArgumentException()
 
-        library.lib_delete(infohash)
+        lib_delete(infohash,announe_list_library)
+        lib_delete(infohash,KnowPeer_library)
+        lib_delete(infohash,ScrapeData_library)
 
     }
 
@@ -111,7 +111,7 @@ class CourseTorrent {
     fun announces(infohash: String): List<List<String>> {
 
 
-        val readVal = library.lib_read(infohash)
+        val readVal = lib_read(infohash,announe_list_library)
 
         if(readVal == null || readVal.toString(Charsets.UTF_8).equals("0"))
             throw IllegalArgumentException()
@@ -169,9 +169,12 @@ class CourseTorrent {
         var interval =  GetFirstUrlSucessInterval(the_announces_list,infohash,peer_id,event.name,uploaded,downloaded,left , shuffled_annouce_list,KnownPeers)
         if(interval == -1){
             //TODO : write shuflfled to db and check even if failed to write
+            //TODO : also write known perrs
             throw TrackerException("all the trackers didint work , in all the tiers")
         }else{
-            //TODO : write shuflfled to db and check even if failed to write
+            lib_write(infohash,listOfListOfStringToByteArray(shuffled_annouce_list).toString(Charsets.UTF_8),announe_list_library)
+            lib_write(infohash,listOfListOfStringToByteArray(KnownPeers).toString(Charsets.UTF_8),KnowPeer_library)
+
             return interval
         }
     }

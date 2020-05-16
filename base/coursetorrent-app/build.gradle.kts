@@ -1,3 +1,4 @@
+val externalLibraryVersion: String? by extra
 plugins {
     application
 }
@@ -16,6 +17,7 @@ dependencies {
 
     implementation("com.google.inject", "guice", guiceVersion)
     implementation("dev.misfitlabs.kotlinguice4", "kotlin-guice", kotlinGuiceVersion)
+    implementation("il.ac.technion.cs.softwaredesign", "primitive-storage-layer", externalLibraryVersion)
 
     testImplementation("org.junit.jupiter", "junit-jupiter-api", junitVersion)
     testImplementation("org.junit.jupiter", "junit-jupiter-params", junitVersion)

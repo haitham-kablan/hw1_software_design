@@ -1,3 +1,6 @@
+import com.google.inject.Inject
+import il.ac.technion.cs.softwaredesign.storage.SecureStorage
+import il.ac.technion.cs.softwaredesign.storage.SecureStorageFactory
 import il.ac.technion.cs.softwaredesign.storage.impl.SecureStorageImpl
 import java.net.HttpURLConnection
 import java.net.URL
@@ -390,29 +393,46 @@ fun ExtractIpAdressWithPort(byteArray: UByteArray) : String{
 
 }
 
-class library  {
-
-
-    private val s_storage : SecureStorageImpl = TODO()
-
-    public fun lib_read(key: String ) :ByteArray?{
-            return s_storage.read(key.toByteArray(Charsets.UTF_8));
-
-        }
-
-        public fun lib_write(key: String, value: String) : Unit{
-
-            s_storage.write(key.toByteArray(Charsets.UTF_8),value.toByteArray(Charsets.UTF_8));
-        }
-
-
-
-        // @throws IllegalArgumentException If [infohash] is not loaded.
-        public fun lib_delete(key: String) : Unit {
-
-            this.lib_write(key, "0")
-
-        }
-
-
+fun lib_read(key: String , storage : SecureStorage) :ByteArray?{
+           return storage.read(key.toByteArray(Charsets.UTF_8));
 }
+
+fun lib_write(key: String, value: String , storage : SecureStorage) : Unit{
+
+         storage.write(key.toByteArray(Charsets.UTF_8),value.toByteArray(Charsets.UTF_8));
+}
+
+// @throws IllegalArgumentException If [infohash] is not loaded.
+fun lib_delete(key: String , storage : SecureStorage) : Unit {
+            lib_write(key, "0",storage)
+}
+
+//class library : SecureStorage {
+//
+//    public fun lib_read(key: String ) :ByteArray?{
+//            return read(key.toByteArray(Charsets.UTF_8));
+//        }
+//
+//        public fun lib_write(key: String, value: String) : Unit{
+//
+//            write(key.toByteArray(Charsets.UTF_8),value.toByteArray(Charsets.UTF_8));
+//        }
+//
+//
+//        // @throws IllegalArgumentException If [infohash] is not loaded.
+//        public fun lib_delete(key: String) : Unit {
+//
+//            this.lib_write(key, "0")
+//
+//        }
+//
+//    override fun read(key: ByteArray): ByteArray? {
+//        TODO("Not yet implemented")
+//    }
+//
+//    override fun write(key: ByteArray, value: ByteArray) {
+//        TODO("Not yet implemented")
+//    }
+//
+//
+//}
