@@ -1,7 +1,9 @@
 package il.ac.technion.cs.softwaredesign
 
+import CompareTwoKnwonPeersAsString
 import GetFirstUrlSucessInterval
 import KnowPeerAsString
+import ListOfListOfStringToListOfString
 
 import Parser
 import SHA1hash
@@ -170,7 +172,7 @@ class CourseTorrent @Inject constructor(private val factory : SecureStorageFacto
 
         var interval =  GetFirstUrlSucessInterval(the_announces_list,infohash,peer_id,event.name,uploaded,downloaded,left , shuffled_annouce_list,KnownPeers)
         if(interval == -1){
-            //TODO : write shuflfled to db and check even if failed to write
+            lib_write(infohash,listOfListOfStringToByteArray(shuffled_annouce_list).toString(Charsets.UTF_8),announe_list_library)
             //TODO : also write known perrs
             throw TrackerException("all the trackers didint work , in all the tiers")
         }else{
@@ -244,7 +246,23 @@ class CourseTorrent @Inject constructor(private val factory : SecureStorageFacto
         if (readVal == null || readVal.toString(Charsets.UTF_8).equals("0"))
             throw IllegalArgumentException()
         val KnowPeers = byteArrayToListOfListOfString(readVal)
-        
+        var sorted_peers = KnowPeers.sortedWith(Comparator<List<String>>{
+            peer_1, peer_2 ->CompareTwoKnwonPeersAsString(peer_1[0],peer_2[0])
+        })
+
+        var sorted_peers_as_list_of_strings = ListOfListOfStringToListOfString(sorted_peers)
+        var unique_peers = sorted_peers_as_list_of_strings.distinct()
+        var res = ArrayList<KnownPeer>()
+        unique_peers.forEach {
+            var ip = it.substringBefore(':')
+            var port = it.substringAfter(':').substringBefore('-').toInt()
+            var peer_ip : String? = if (it.contains('-')){ it.substringAfter('-')}
+                                    else{ null}
+            res.add(KnownPeer(ip,port,peer_ip))
+        }
+
+        return res
+
 
     }
 

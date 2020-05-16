@@ -52,10 +52,10 @@ fun main() {
 
     var list = mutableListOf<List<String>>()
     var peers = mutableListOf<String>()
-    var x =
-        GetFirstUrlSucessInterval(announce_list,infohash,peer_id,"started",0,0,0,list,peers)
-     println(x)
-    println(peers.toString())
+    //var x =
+     //   GetFirstUrlSucessInterval(announce_list,infohash,peer_id,"started",0,0,0,list,peers)
+    // println(x)
+   // println(peers.toString())
 
 
 

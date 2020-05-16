@@ -1,4 +1,5 @@
 import com.google.inject.Inject
+import com.sun.javafx.util.Utils.split
 import il.ac.technion.cs.softwaredesign.storage.SecureStorage
 import il.ac.technion.cs.softwaredesign.storage.SecureStorageFactory
 import il.ac.technion.cs.softwaredesign.storage.impl.SecureStorageImpl
@@ -8,6 +9,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.charset.CharsetDecoder
 import java.security.MessageDigest
+import java.util.LinkedHashMap
 
 
 public fun listOfListOfStringToByteArray( list : List<List<String>>) : ByteArray {
@@ -226,16 +228,34 @@ fun CheckResponse(response : ByteArray) : Boolean{
 fun GetKnownPeers(byteArray: ByteArray) : MutableList<List<String>>{
 
     var res  = mutableListOf<List<String>>()
-    var unsigned = byteArray.toUByteArray()
-    var i = 0
-    while(i < unsigned.size){
+    var not_compat_reponse = try { Parser(byteArray)}
+                             catch(E : java.lang.Exception){
+                                  res  = mutableListOf<List<String>>()
+                                 var unsigned = byteArray.toUByteArray()
+                                 var i = 0
+                                 while(i < unsigned.size){
+                                     var tmp = ArrayList<String>()
+                                     tmp.add(ExtractIpAdressWithPort(unsigned.copyOfRange(i,i+6)))
+                                     res.add(tmp)
+                                     i = i + 6
+                                 }
+
+                                 return res
+                             }
+
+    //Parase it as non_compact_repsone
+
+    (not_compat_reponse.metaInfoMap.get("peers") as ArrayList<LinkedHashMap<String, Any?>>).forEach {
+        var curr_known_peer = (it.get("ip")) as String +
+                             ":" + (it.get("port") as Int).toString() +
+                                "-" + (it.get("peer id")) as String
         var tmp = ArrayList<String>()
-        tmp.add(ExtractIpAdressWithPort(unsigned.copyOfRange(i,i+6)))
+        tmp.add(curr_known_peer)
         res.add(tmp)
-        i = i + 6
     }
 
     return res
+
 }
 
 fun SendHttpRequset(url: String , infohas : String , peer_id : String,
@@ -409,10 +429,44 @@ fun KnowPeerAsString( ip: String,
     return knownPeer
 }
 
+fun IPStringTOIntList(ip : String) : List<Int>{
 
+    var list = ArrayList<Int>()
+    (ip as CharSequence).split(",").forEach {
+        list.add(it.toInt())
+    }
 
+    return list
+}
 
+fun CompareTwoKnwonPeersAsString(peer1 : String, peer2 : String) : Int {
 
+    var peer1_list = IPStringTOIntList(peer1)
+    var peer2_list = IPStringTOIntList(peer2)
+
+    var i = 0
+    while ( i < peer1_list.size ){
+        if(peer1_list[i] == peer2_list[i]){
+            continue
+        }
+        return peer1_list[i] - peer2_list[i]
+    }
+
+    return 0
+
+}
+
+fun ListOfListOfStringToListOfString(given : List<List<String>>) : List<String>{
+
+    var list = ArrayList<String>()
+    given.forEach {
+        it.forEach {
+            list.add(it)
+        }
+    }
+    return list
+
+}
 
 fun lib_read(key: String , storage : SecureStorage) :ByteArray?{
            return storage.read(key.toByteArray(Charsets.UTF_8));
