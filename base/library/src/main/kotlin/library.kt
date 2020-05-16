@@ -153,7 +153,7 @@ fun GetFirstUrlSucessInterval(old_list : List<List<String>>, infohas : String, p
                               event: String, uploaded: Long,
                               downloaded: Long, left: Long,
                               list_to_write : MutableList<List<String>>,
-                               KnownPeers : MutableList<String>) : Int{
+                               KnownPeers :MutableList<List<String>>) : Int{
 
     var new_announce_list = ArrayList<ArrayList<String>>()
     var not_found = true
@@ -223,13 +223,15 @@ fun CheckResponse(response : ByteArray) : Boolean{
 
 }
 
-fun GetKnownPeers(byteArray: ByteArray) : MutableList<String>{
+fun GetKnownPeers(byteArray: ByteArray) : MutableList<List<String>>{
 
-    var res  = ArrayList<String>()
+    var res  = mutableListOf<List<String>>()
     var unsigned = byteArray.toUByteArray()
     var i = 0
     while(i < unsigned.size){
-        res.add(ExtractIpAdressWithPort(unsigned.copyOfRange(i,i+6)))
+        var tmp = ArrayList<String>()
+        tmp.add(ExtractIpAdressWithPort(unsigned.copyOfRange(i,i+6)))
+        res.add(tmp)
         i = i + 6
     }
 
@@ -392,6 +394,25 @@ fun ExtractIpAdressWithPort(byteArray: UByteArray) : String{
 
 
 }
+
+
+fun KnowPeerAsString( ip: String,
+                                  port: Int,
+                                  peerId: String?) : String{
+
+
+    var knownPeer = ip + ":" + port
+    if (peerId != null){
+        knownPeer = knownPeer + "-" + peerId
+    }
+
+    return knownPeer
+}
+
+
+
+
+
 
 fun lib_read(key: String , storage : SecureStorage) :ByteArray?{
            return storage.read(key.toByteArray(Charsets.UTF_8));

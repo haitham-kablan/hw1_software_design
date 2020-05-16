@@ -1,6 +1,8 @@
 package il.ac.technion.cs.softwaredesign
 
 import GetFirstUrlSucessInterval
+import KnowPeerAsString
+
 import Parser
 import SHA1hash
 import byteArrayToListOfListOfString
@@ -11,7 +13,7 @@ import il.ac.technion.cs.softwaredesign.storage.SecureStorageFactory
 import lib_delete
 import lib_read
 import lib_write
-import library
+
 
 import listOfListOfStringToByteArray
 import java.lang.Exception
@@ -164,7 +166,7 @@ class CourseTorrent @Inject constructor(private val factory : SecureStorageFacto
                 List(6) {alphbet.random()}.joinToString("")
 
         var shuffled_annouce_list = mutableListOf<List<String>>()
-        var KnownPeers = mutableListOf<String>()
+        var KnownPeers = mutableListOf<List<String>>()
 
         var interval =  GetFirstUrlSucessInterval(the_announces_list,infohash,peer_id,event.name,uploaded,downloaded,left , shuffled_annouce_list,KnownPeers)
         if(interval == -1){
@@ -202,7 +204,26 @@ class CourseTorrent @Inject constructor(private val factory : SecureStorageFacto
      *
      * @throws IllegalArgumentException If [infohash] is not loaded.
      */
-    fun invalidatePeer(infohash: String, peer: KnownPeer): Unit = TODO("Implement me!")
+    fun invalidatePeer(infohash: String, peer: KnownPeer): Unit {
+        val readVal = lib_read(infohash,KnowPeer_library)
+        if (readVal == null || readVal.toString(Charsets.UTF_8).equals("0"))
+            throw IllegalArgumentException()
+
+        val KnowPeerAsString = KnowPeerAsString(peer.ip,peer.port,peer.peerId)
+        val KnowPeers = byteArrayToListOfListOfString(readVal)
+        for(curr in 0..KnowPeers.size) {
+            KnowPeers[curr].forEach {
+                if (it.equals(KnowPeerAsString)){
+                    val Corrected_Know_Peers = KnowPeers.drop(curr)
+                }
+            }
+        }
+
+        lib_write(infohash,listOfListOfStringToByteArray(KnowPeers).toString(Charsets.UTF_8),KnowPeer_library)
+
+    }
+
+
 
 
     /**
@@ -218,7 +239,14 @@ class CourseTorrent @Inject constructor(private val factory : SecureStorageFacto
      * @throws IllegalArgumentException If [infohash] is not loaded.
      * @return Sorted list of known peers.
      */
-    fun knownPeers(infohash: String): List<KnownPeer> = TODO("Implement me!")
+    fun knownPeers(infohash: String): List<KnownPeer> {
+        val readVal = lib_read(infohash,KnowPeer_library)
+        if (readVal == null || readVal.toString(Charsets.UTF_8).equals("0"))
+            throw IllegalArgumentException()
+        val KnowPeers = byteArrayToListOfListOfString(readVal)
+        
+
+    }
 
     /**
      * Return all known statistics from trackers of the torrent identified by [infohash]. The statistics displayed
